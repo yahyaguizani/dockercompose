@@ -40,7 +40,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-100 p-8">
-      <h1 className="text-3xl font-bold mb-6">🫀 Prédiction de Maladie Cardiaque changed v2</h1>
+      <h1 className="text-3xl font-bold mb-6">🫀 Prédiction de Maladie Cardiaque changed</h1>
 
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-xl p-6 w-full max-w-3xl grid grid-cols-2 gap-4">
         <input name="age" type="number" placeholder="Âge" value={formData.age} onChange={handleChange} required className="border p-2 rounded" />
