@@ -40,7 +40,8 @@ pipeline {
         stage('Start New Containers') {
             steps {
                 sh '''
-                    docker-compose -f ./projet/docker-compose.yml up -d
+                    docker-compose -f ./projet/docker-compose.yml up -d --build --force-recreate
+
                 '''
             }
         }
