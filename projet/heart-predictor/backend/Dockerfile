@@ -8,7 +8,7 @@ COPY random_forest_model.pkl .
 COPY app.py .
 
 # Installer les dépendances
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Exposer le port
 EXPOSE 8000
