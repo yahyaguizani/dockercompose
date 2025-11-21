@@ -1,0 +1,95 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8081:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - web
+
+  # === Microservice Heart Predictor ===
+  heart-backend:
+    build: ./heart-predictor/backend
+    container_name: heart-backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.heart-backend.rule=Host(`heart-backend.localhost`)"
+      - "traefik.http.services.heart-backend.loadbalancer.server.port=8000"
+    networks:
+      - web
+
+  heart-frontend:
+    build: ./heart-predictor/frontend
+    container_name: heart-frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.heart-frontend.rule=Host(`heart-frontend.localhost`)"
+      - "traefik.http.services.heart-frontend.loadbalancer.server.port=3000"
+    depends_on:
+      - heart-backend
+    networks:
+      - web
+
+  # === Microservice Auth ===
+  auth-backend:
+    build: ./auth-microservice/backend
+    container_name: auth-backend
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=authdb
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth-backend.rule=Host(`auth-backend.localhost`)"
+      - "traefik.http.services.auth-backend.loadbalancer.server.port=5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - web
+
+  auth-frontend:
+    build: ./auth-microservice/frontend
+    container_name: auth-frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth-frontend.rule=Host(`auth-frontend.localhost`)"
+      - "traefik.http.services.auth-frontend.loadbalancer.server.port=3001"
+    depends_on:
+      - auth-backend
+    networks:
+      - web
+
+  db:
+    image: postgres:15
+    container_name: auth-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: authdb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d authdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - web
+
+networks:
+  web:
+    driver: bridge
+
+volumes:
+  db_data:
+
