@@ -63,7 +63,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth-frontend.rule=Host(`auth-frontend.localhost`)"
-      - "traefik.http.services.auth-frontend.loadbalancer.server.port=3001"
+      - "traefik.http.services.auth-frontend.loadbalancer.server.port=3000"
     depends_on:
       - auth-backend
     networks:
